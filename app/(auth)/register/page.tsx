@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { registerWithEmail } from "@/lib/firebase/auth";
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -11,30 +12,26 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-    setSuccess("");
 
     if (!name || !email || !password || !confirmPassword) {
-      setError("Please fill in all fields");
+      toast.error("Please fill in all fields", { position: "top-center" });
       setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      toast.error("Passwords do not match", { position: "top-center" });
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      toast.error("Password must be at least 6 characters", { position: "top-center" });
       setLoading(false);
       return;
     }
@@ -42,32 +39,21 @@ export default function RegisterPage() {
     const result = await registerWithEmail(email, password, name);
     
     if (result.success) {
-      setSuccess(result.message);
+      toast.success(result.message, { position: "top-center" });
       setTimeout(() => {
         router.push("/login");
-      }, 3000);
+      }, 2000);
     } else {
-      setError(result.message);
+      toast.error(result.message, { position: "top-center" });
       setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-100 flex items-center justify-center p-4">
+      <Toaster position="top-center" />
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         <h1 className="text-2xl font-bold mb-6 text-center">Create Account</h1>
-        
-        {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">
-            {error}
-          </div>
-        )}
-        
-        {success && (
-          <div className="bg-green-100 text-green-700 p-3 rounded mb-4 text-sm">
-            {success}
-          </div>
-        )}
         
         <form onSubmit={handleSubmit}>
           <input

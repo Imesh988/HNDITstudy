@@ -23,19 +23,19 @@ export default function RegisterForm() {
         confirmPassword: "",
     });
 
-    const handleChange  = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-       setFormData(prev => ({
-        ...prev,
-        [name]: value,
-       }));
-
-       if(error[name]) {
-        setError(prev => ({
+        setFormData(prev => ({
             ...prev,
-            [name]: "",
+            [name]: value,
         }));
-       }
+
+        if (error[name]) {
+            setError(prev => ({
+                ...prev,
+                [name]: "",
+            }));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -46,7 +46,7 @@ export default function RegisterForm() {
 
         const result = registerSchema.safeParse(formData);
 
-        if(!result.success){
+        if (!result.success) {
             const formattedErrors: Record<string, string> = {};
             result.error.issues.forEach(issue => {
                 formattedErrors[issue.path[0] as string] = issue.message;
@@ -58,7 +58,7 @@ export default function RegisterForm() {
 
         const response = await registerWithEmail(formData.email, formData.password, formData.displayName);
 
-        if(response.success) {
+        if (response.success) {
             setSuccessMessage(response.message);
             setTimeout(() => {
                 router.push("/login");
@@ -66,7 +66,7 @@ export default function RegisterForm() {
         } else {
             setError({ general: response.message });
         }
-        
+
         setLoading(false);
     };
 
@@ -79,7 +79,7 @@ export default function RegisterForm() {
                     </div>
                 )}
 
-                    <Input
+                <Input
                     label="full name "
                     name="displayName"
                     type="text"
@@ -88,47 +88,47 @@ export default function RegisterForm() {
                     onChange={handleChange}
                     error={error.displayName}
                     required
-                    >
-                    
-                    </Input>
+                >
 
-                            <Input
-          label="Email Address"
-          name="email"
-          type="email"
-          placeholder="you@example.com"
-          value={formData.email}
-          onChange={handleChange}
-          error={error.email}
-          required
-        />
+                </Input>
 
-        <Input
-          label="Password"
-          name="password"
-          type="password"
-          placeholder="••••••••"
-          value={formData.password}
-          onChange={handleChange}
-          error={error.password}
-          required
-        />
+                <Input
+                    label="Email Address"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    error={error.email}
+                    required
+                />
 
-        <Input
-          label="Confirm Password"
-          name="confirmPassword"
-          type="password"
-          placeholder="••••••••"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          error={error.confirmPassword}
-          required
-        />
+                <Input
+                    label="Password"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    error={error.password}
+                    required
+                />
+
+                <Input
+                    label="Confirm Password"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    error={error.confirmPassword}
+                    required
+                />
 
                 <Button type="submit" disabled={loading}>
                     Create account
                 </Button>
-                
+
                 <p className="text-center text-sm text-gray-600 mt-4">
                     Already have an account?{' '}
                     <a href="/login" className="text-blue-600 hover:underline">
@@ -136,7 +136,7 @@ export default function RegisterForm() {
                     </a>
                 </p>
             </form>
-            
+
         </Card>
     )
 

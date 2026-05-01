@@ -5,12 +5,16 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { app } from "@/lib/firebase/client";
-import { ArrowRight, Clock, Link } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { RiUserCommunityFill } from "react-icons/ri";
-import { motion, AnimatePresence } from "framer-motion"; 
+import { motion, AnimatePresence } from "framer-motion";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { FaComment } from "react-icons/fa";
 import { FaVideo } from "react-icons/fa6";
+import Link from "next/link";
+import { MdDashboard } from "react-icons/md";
+
+
 
 
 
@@ -20,7 +24,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [currentIndex , setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const HeroSection = [
     "https://static.vecteezy.com/system/resources/thumbnails/002/173/392/small/student-studying-at-home-free-vector.jpg",
@@ -75,90 +79,102 @@ export default function DashboardPage() {
 
   const Navbar = () => {
     return (
-     <nav className="flex items-center justify-between px-6 md:px-8 py-3 bg-white/70 backdrop-blur-md sticky top-4 z-50 max-w-6xl mx-auto rounded-full border border-indigo-50 shadow-lg mt-4">
-  
-  <div className="flex items-center gap-2">
-    <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-md shadow-indigo-200">
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-      </svg>
-    </div>
-    <span className="hidden sm:block font-bold text-slate-800 text-lg">IT<span className="text-indigo-600">Study</span></span>
-  </div>
+      <nav className="flex items-center justify-between px-6 md:px-8 py-3 bg-white/70 backdrop-blur-md sticky top-4 z-50 max-w-6xl mx-auto rounded-full border border-indigo-50 shadow-lg mt-4">
 
-  <div className="ml-auto flex items-center gap-3 md:gap-6">
-    
-    <div className="hidden md:flex items-center gap-4 border-r border-gray-200 pr-6">
-      <div className="cursor-pointer group">
-        <div className="p-2.5 bg-indigo-50 rounded-xl group-hover:bg-indigo-600 transition-all duration-300">
-          <FaComment className="w-5 h-5 text-indigo-600 group-hover:text-white" />
+        <div className="flex items-center gap-2">
+          <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-md shadow-indigo-200">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+            </svg>
+          </div>
+          <span className="hidden sm:block font-bold text-slate-800 text-lg">IT<span className="text-indigo-600">Study</span></span>
         </div>
-      </div>
 
-      <div className="cursor-pointer group">
-        <div className="p-2.5 bg-rose-50 rounded-xl group-hover:bg-rose-600 transition-all duration-300">
-          <FaVideo className="w-5 h-5 text-rose-600 group-hover:text-white" />
+        <div className="ml-auto flex items-center gap-3 md:gap-6">
+
+          <div className="hidden md:flex items-center gap-4 border-r border-gray-200 pr-6">
+            <Link href="/forms/comments">
+              <div className="cursor-pointer group">
+                <div className="p-2.5 bg-indigo-50 rounded-xl group-hover:bg-indigo-600 transition-all duration-300">
+                  <FaComment className="w-5 h-5 text-indigo-600 group-hover:text-white" />
+                </div>
+              </div>
+            </Link>
+
+            
+            <Link href="/forms/video">
+            <div className="cursor-pointer group">
+              <div className="p-2.5 bg-rose-50 rounded-xl group-hover:bg-rose-600 transition-all duration-300">
+                <FaVideo className="w-5 h-5 text-rose-600 group-hover:text-white" />
+              </div>
+            </div>
+            </Link>
+
+            <Link href="/dashboard">
+              <div className="cursor-pointer group">
+                <div className="p-2.5 bg-gray-100 rounded-xl group-hover:bg-gray-400 transition-all duration-300">
+                  <MdDashboard className="w-5 h-5 text-gray-700 group-hover:text-white" />
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="flex items-center gap-3 pl-2">
+            <div className="flex flex-col items-end hidden lg:flex">
+              <span className="text-sm font-bold text-slate-900 leading-tight">
+                {user?.displayName || 'Guest User'}
+              </span>
+              <span className="text-[10px] text-indigo-500 font-semibold uppercase tracking-wider">Student</span>
+            </div>
+
+            <div className="bg-indigo-100 p-2 rounded-full border-2 border-white shadow-sm">
+              <RiUserCommunityFill className="w-6 h-6 text-indigo-600 cursor-pointer" />
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="ml-2 p-2 text-red-500 hover:bg-red-50 rounded-full transition-all duration-300"
+            >
+              <RiLogoutCircleLine className="w-7 h-7" />
+            </button>
+          </div>
+
         </div>
-      </div>
-    </div>
-
-    <div className="flex items-center gap-3 pl-2">
-      <div className="flex flex-col items-end hidden lg:flex">
-        <span className="text-sm font-bold text-slate-900 leading-tight">
-          {user?.displayName || 'Guest User'}
-        </span>
-        <span className="text-[10px] text-indigo-500 font-semibold uppercase tracking-wider">Student</span>
-      </div>
-
-      <div className="bg-indigo-100 p-2 rounded-full border-2 border-white shadow-sm">
-        <RiUserCommunityFill className="w-6 h-6 text-indigo-600 cursor-pointer" />
-      </div>
-
-      <button 
-        onClick={handleLogout}
-        className="ml-2 p-2 text-red-500 hover:bg-red-50 rounded-full transition-all duration-300"
-      >
-        <RiLogoutCircleLine className="w-7 h-7" />
-      </button>
-    </div>
-
-  </div>
-</nav>
+      </nav>
     )
   }
 
   return (
 
 
-      <main className="min-h-screen bg-[#F5F7FF] relative overflow-hidden">
-      
-      
+    <main className="min-h-screen bg-[#F5F7FF] relative overflow-hidden">
+
+
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-200/50 rounded-full blur-[100px] animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-rose-100/60 rounded-full blur-[80px] animate-bounce-slow" />
-      
-      <div className="absolute inset-0 opacity-[0.15]" 
-           style={{ backgroundImage: `radial-gradient(#4f46e5 0.5px, transparent 0.5px)`, backgroundSize: '30px 30px' }}>
+
+      <div className="absolute inset-0 opacity-[0.15]"
+        style={{ backgroundImage: `radial-gradient(#4f46e5 0.5px, transparent 0.5px)`, backgroundSize: '30px 30px' }}>
       </div>
 
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-8 py-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-32 md:pt-52 relative z-10">
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
           className="space-y-6"
         >
           <h1 className="text-5xl lg:text-7xl font-extrabold text-gray-900 leading-[1.1]">
-            Transform Your <br/>
+            Transform Your <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-              IT Career 
-            </span> <br/>
+              IT Career
+            </span> <br />
             <span className="text-gray-800">IT Study</span>
           </h1>
-          
+
           <p className="text-slate-600 text-lg max-w-lg leading-relaxed">
             The comprehensive learning platform tailored specifically for Higher National Diploma in Information Technology students. Accelerate your career with industry-aligned curriculum.
           </p>
@@ -174,14 +190,14 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
           className="relative"
         >
           <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-[2.6rem] blur opacity-20"></div>
-          
+
           <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl overflow-hidden relative border border-white/50">
             <div className="relative h-[300px] md:h-[450px] overflow-hidden rounded-[2rem]">
               <AnimatePresence mode="wait">
@@ -198,7 +214,7 @@ export default function DashboardPage() {
               </AnimatePresence>
             </div>
 
-            <motion.div 
+            <motion.div
               animate={{ y: [0, -15, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               className="absolute bottom-10 left-[-10px] bg-white/90 backdrop-blur-lg p-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-indigo-50"
@@ -212,7 +228,7 @@ export default function DashboardPage() {
               </div>
             </motion.div>
           </div>
-          
+
           <div className="absolute -top-6 -right-6 w-20 h-20 bg-yellow-400/20 rounded-full blur-xl animate-pulse" />
         </motion.div>
       </div>
@@ -250,11 +266,11 @@ export default function DashboardPage() {
     //      
     //     </div>
     //   </nav>
-      
+
     //   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     //     <div className="bg-white rounded-lg shadow-md p-6">
     //       <h2 className="text-2xl font-bold mb-4">Welcome, {user?.email}!</h2>
-          
+
     //       <div className="space-y-2">
     //         <p><strong>Email:</strong> {user?.email}</p>
     //         <p><strong>Email Verified:</strong> ✅ Yes</p>
