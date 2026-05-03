@@ -105,113 +105,157 @@ export default function LoginPage() {
   }
 
   return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
+          <div className="min-h-screen bg-[#f8faff] flex flex-col font-sans">
+      
+      {/* Header Logo Section */}
+      
+
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row min-h-[600px]">
+          
+          {/* LEFT SIDE - IMAGE & TEXT (Hidden on mobile) */}
+          <div className="hidden md:flex md:w-1/2 bg-[#1a1a4d] relative p-12 flex-col justify-end text-white overflow-hidden">
+            {/* Background Image with Overlay */}
+            <div className="absolute inset-0 opacity-40">
+                <img 
+                    src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80" 
+                    alt="Coding" 
+                    className="w-full h-full object-cover"
+                />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a4d] to-transparent"></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-4xl font-bold leading-tight mb-4">
+                Improve Your IT Skills
+              </h2>
+              
+            </div>
+          </div>
+
+          {/* RIGHT SIDE - FORMS */}
+          <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center bg-[#fbfcff]">
+            
+            {!showReset ? (
+              // --- LOGIN FORM ---
+              <div className="w-full max-w-sm mx-auto">
+                <h1 className="text-2xl font-bold text-[#1a1a4d] mb-2">Welcome Back</h1>
+                <p className="text-gray-500 text-sm mb-8">Please enter your details to access your learning dashboard.</p>
+                
+                {error && (
+                  <div className="bg-red-50 text-red-600 p-3 rounded-xl mb-4 text-xs border border-red-100">
+                    {error}
+                  </div>
+                )}
+                
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 ml-1">Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="name@company.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full p-4 bg-white border border-gray-100 rounded-xl mt-1 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all shadow-sm"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between items-center ml-1">
+                      <label className="text-xs font-semibold text-gray-600">Password</label>
+                      <button 
+                        type="button" 
+                        onClick={() => setShowReset(true)}
+                        className="text-[10px] font-bold text-blue-800 hover:underline"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full p-4 bg-white border border-gray-100 rounded-xl mt-1 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all shadow-sm"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-[#ece371] text-[#4a4512] p-4 rounded-xl hover:bg-[#e2d85d] transition-colors font-bold shadow-md flex items-center justify-center gap-2 mt-2"
+                  >
+                    {loading ? "Signing in..." : "Login to Dashboard →"}
+                  </button>
+
+                  {/* Social Logins */}
+                  <div className="relative my-8">
+                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-100"></span></div>
+                  </div>
+
+                 
+                </form>
+                
+                <p className="text-center mt-8 text-gray-500 text-sm">
+                  Don't have an account?{" "}
+                  <a href="/register" className="text-blue-800 font-bold hover:underline">
+                    Register
+                  </a>
+                </p>
+              </div>
+            ) : (
+              // --- FORGOT PASSWORD FORM ---
+              <div className="w-full max-w-sm mx-auto animate-fade-in">
+                <h1 className="text-2xl font-bold text-[#1a1a4d] mb-4">Reset Password</h1>
+                
+                {resetMessage && (
+                  <div className="bg-green-50 text-green-700 p-4 rounded-xl mb-4 text-sm border border-green-100">
+                    {resetMessage}
+                  </div>
+                )}
+                
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+                    Enter your email address and we'll send you a link to reset your password.
+                  </p>
+                  
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    className="w-full p-4 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none shadow-sm"
+                    required
+                  />
+                  
+                  <button
+                    type="submit"
+                    disabled={resetLoading}
+                    className="w-full bg-[#1a1a4d] text-white p-4 rounded-xl hover:bg-[#252563] transition-colors font-bold shadow-lg"
+                  >
+                    {resetLoading ? "Sending..." : "Send Reset Email"}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={handleBackToLogin}
+                    className="w-full mt-2 text-gray-500 hover:text-[#1a1a4d] text-sm font-medium"
+                  >
+                    Back to Login
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Section */}
+      <div className="p-8 flex flex-col md:flex-row justify-between items-center text-[11px] text-gray-400 gap-4">
         
-        {!showReset ? (
-          // LOGIN FORM
-          <>
-            <h1 className="text-2xl font-bold mb-6 text-center">Welcome Back</h1>
-            
-            {error && (
-              <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">
-                {error}
-              </div>
-            )}
-            
-            <form onSubmit={handleSubmit}>
-              <input
-                type="email"
-                placeholder="Email Address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
-              >
-                {loading ? "Signing in..." : "Sign In"}
-              </button>
-              
-              <div className="mt-4 text-center">
-                <button
-                  type="button"
-                  onClick={() => setShowReset(true)}
-                  className="text-sm text-blue-600 hover:text-blue-800"
-                >
-                  Forgot Password?
-                </button>
-              </div>
-            </form>
-            
-            <p className="text-center mt-4 text-gray-600">
-              Don't have an account?{" "}
-              <a href="/register" className="text-blue-600 hover:underline">
-                Create one
-              </a>
-            </p>
-          </>
-        ) : (
-          // FORGOT PASSWORD FORM
-          <>
-            <h1 className="text-2xl font-bold mb-6 text-center">Reset Password</h1>
-            
-            {error && (
-              <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">
-                {error}
-              </div>
-            )}
-            
-            {resetMessage && (
-              <div className="bg-green-100 text-green-700 p-3 rounded mb-4 text-sm">
-                {resetMessage}
-              </div>
-            )}
-            
-            <form onSubmit={handleResetPassword}>
-              <p className="text-gray-600 text-sm mb-4">
-                Enter your email address and we'll send you a link to reset your password.
-              </p>
-              
-              <input
-                type="email"
-                placeholder="Email Address"
-                value={resetEmail}
-                onChange={(e) => setResetEmail(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              
-              <button
-                type="submit"
-                disabled={resetLoading}
-                className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
-              >
-                {resetLoading ? "Sending..." : "Send Reset Email"}
-              </button>
-              
-              <button
-                type="button"
-                onClick={handleBackToLogin}
-                className="w-full mt-3 text-gray-600 p-3 rounded-lg hover:text-gray-800 text-sm"
-              >
-                Back to Login
-              </button>
-            </form>
-          </>
-        )}
-        
+    
       </div>
     </div>
   );

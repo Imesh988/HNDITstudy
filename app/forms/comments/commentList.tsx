@@ -29,7 +29,6 @@ export default function CommentsList({
   
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Extract email from name field (format: "Name [email@example.com]")
   const extractEmailFromName = (name: string): string | null => {
     const emailMatch = name.match(/\[(.*?)\]/);
     if (emailMatch) {
@@ -38,7 +37,6 @@ export default function CommentsList({
     return null;
   };
 
-  // Get display name without email
   const getDisplayName = (fullName: string): string => {
     return fullName.replace(/\[.*?\]/, '').trim();
   };
@@ -51,7 +49,7 @@ export default function CommentsList({
         abortControllerRef.current.abort();
       }
     };
-  }, [refreshTrigger, currentUserEmail]); // Re-fetch when user changes
+  }, [refreshTrigger, currentUserEmail]); 
 
   const fetchComments = async () => {
     if (abortControllerRef.current) {
@@ -77,10 +75,8 @@ export default function CommentsList({
     }
   };
 
-  // ✅ Filter to show only current user's comments
   const filterCommentsByUser = (commentsToFilter: Comm[]) => {
     if (isLoggedIn && currentUserEmail) {
-      // Show only current user's comments
       const userComments = commentsToFilter.filter(comment => {
         const commentEmail = extractEmailFromName(comment.name);
         return commentEmail && commentEmail.toLowerCase() === currentUserEmail.toLowerCase();

@@ -4,8 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { VideoAPI } from '../../../../services/api';
 import { Video } from '@/type/Video';
 import toast, { Toaster } from 'react-hot-toast';
-import { Plus, Edit2, Trash2, X, Check, Video as VideoIcon, Calendar, LayoutGrid } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Check, Video as VideoIcon, Calendar, LayoutGrid, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
+import { MdSpaceDashboard } from 'react-icons/md';
+import { FaVideo } from 'react-icons/fa';
+import { FaCommentSms } from 'react-icons/fa6';
+
+interface NavItemProps {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+  active?: boolean;
+}
 
 export default function VideoAdmin() {
     const [videos, setVideos] = useState<Video[]>([]);
@@ -176,7 +186,58 @@ export default function VideoAdmin() {
     }
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans">
+      
+
+
+
+
+
+ <div className="flex min-h-screen bg-[#F8F9FD] font-sans text-slate-900">
+      
+
+
+
+      <aside className="w-64 bg-white border-r border-gray-100 flex-col fixed h-full hidden lg:flex">
+        <div className="p-6">
+          <div className="flex items-center gap-2 text-indigo-700 font-bold text-xl">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+              <LayoutDashboard size={20} />
+            </div>
+            <span>Admin Portal</span>
+          </div>
+        </div>
+
+        <nav className="flex-1 px-4 space-y-2 mt-4">
+          <NavItem icon={<MdSpaceDashboard size={20} />} label="Dashboard" href='/admin' />
+          {/* <NavItem icon={<FaUsersLine size={20} />} label="User Management" href='/admin/users' /> */}
+          <NavItem icon={<FaVideo size={20} />} label="upload Video" href='/forms/video/admin' />
+          <NavItem icon={<FaCommentSms size={20} />} label="Upload Approvals" href='/admin/load' />
+        </nav>
+
+        <div className="p-4 border-t border-gray-100">
+          <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-2xl">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="admin" className="w-10 h-10 rounded-xl bg-indigo-100" />
+            <div>
+              <p className="text-sm font-bold text-slate-800">Admin Central</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Controller</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      
+
+      <main className="flex-1 lg:ml-64 flex flex-col">
+        <header className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-10">
+          <h1 className="text-sm font-bold text-indigo-900 uppercase tracking-widest">IT Student Portal Admin</h1>
+          <div className="flex items-center gap-4">
+         
+            
+          </div>
+        </header>
+ 
+
+   <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans">
             <Toaster />
             
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -226,6 +287,8 @@ export default function VideoAdmin() {
                         </div>
                     </div>
                 </div>
+
+               
 
                 {videos.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-24 bg-white/50 border-2 border-dashed border-slate-200 rounded-[2rem]">
@@ -374,5 +437,21 @@ export default function VideoAdmin() {
                 </div>
             )}
         </div>
+      </main>
+    </div>
+
+
+
     );
 }
+
+const NavItem: React.FC<NavItemProps> = ({ icon, label, href, active = false }) => (
+  <Link href={href}>
+  <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 ${
+    active ? 'bg-indigo-600 shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-indigo-200'
+  }`}>
+    {icon}
+    <span className="text-sm font-bold tracking-tight">{label}</span>
+  </div>
+  </Link>
+);
