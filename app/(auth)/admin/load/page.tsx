@@ -11,6 +11,11 @@ import { FaUsersLine } from "react-icons/fa6";
 import { FaCommentSms } from "react-icons/fa6";
 import { LayoutDashboard } from "lucide-react";
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { getAuth, signOut } from 'firebase/auth';
+import toast, { Toaster } from 'react-hot-toast';
+import { RiLogoutCircleLine } from "react-icons/ri";
+import { app } from '@/lib/firebase/client'; 
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -20,13 +25,55 @@ interface NavItemProps {
 }
 
 
-
+const auth = getAuth(app);
 
 function CommentLoad() {
     const [comments, setComments] = useState<Comm[]>([]);
     const [allComments, setAllComments] = useState<Comm[]>([]); 
+    const router = useRouter();
+      const [adminName, setAdminName] = useState('Admin');
     
+    
+   useEffect(() => {
+        fetchComment();
+        checkAdminAuth();
+    } ,  []);
 
+
+
+
+      const checkAdminAuth = () => {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        
+        if (!user && !isAdmin) {
+          router.push('/login');
+        }
+      };
+    
+      useEffect(() => {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (user?.displayName) {
+          setAdminName(user.displayName);
+        } else {
+          setAdminName('Admin User');
+        }
+      }, []);
+    
+      const handleAdminLogout = async () => {
+        try {
+          const auth = getAuth();
+          await signOut(auth);
+          localStorage.removeItem('isAdmin');
+          sessionStorage.clear();
+          router.push('/login');
+        } catch (error) {
+          console.error("Logout error:", error);
+          toast.error("Logout failed. Please try again.");
+        }
+      };
 
     const fetchComment =  async () => {
         try {
@@ -39,50 +86,43 @@ function CommentLoad() {
         }
     }
 
-    useEffect(() => {
-        fetchComment();
-    } ,  []);
-
+ 
 
     return (
-
-
-       
-
-
-
       <div className="flex min-h-screen bg-[#F8F9FD] font-sans text-slate-900">
-      
-
-
-
       <aside className="w-64 bg-white border-r border-gray-100 flex-col fixed h-full hidden lg:flex">
-        <div className="p-6">
-          <div className="flex items-center gap-2 text-indigo-700 font-bold text-xl">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-              <LayoutDashboard size={20} />
-            </div>
-            <span>Admin Portal</span>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-2 mt-4">
-          <NavItem icon={<MdSpaceDashboard size={20} />} label="Dashboard" href='/admin' />
-          {/* <NavItem icon={<FaUsersLine size={20} />} label="User Management" href='/admin/users' /> */}
-          <NavItem icon={<FaVideo size={20} />} label="upload Video" href='/forms/video/admin' />
-          <NavItem icon={<FaCommentSms size={20} />} label="Upload Approvals" href='/admin/load' />
-        </nav>
-
-        <div className="p-4 border-t border-gray-100">
-          <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-2xl">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="admin" className="w-10 h-10 rounded-xl bg-indigo-100" />
-            <div>
-              <p className="text-sm font-bold text-slate-800">Admin Central</p>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Controller</p>
-            </div>
-          </div>
-        </div>
-      </aside>
+             <div className="p-6">
+               <div className="flex items-center gap-2 text-indigo-700 font-bold text-xl">
+                 <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+                   <LayoutDashboard size={20} />
+                 </div>
+                 <span>Admin Portal</span>
+               </div>
+             </div>
+     
+             <nav className="flex-1 px-4 space-y-2 mt-4">
+               <NavItem icon={<MdSpaceDashboard size={20} />} label="Dashboard" href='/admin' />
+               <NavItem icon={<FaVideo size={20} />} label="upload Video" href='/forms/video/admin' />
+               <NavItem icon={<FaCommentSms size={20} />} label="Upload Approvals" href='/admin/load' />
+             </nav>
+     
+             <div className="p-4 border-t border-gray-100">
+               <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-2xl">
+                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="admin" className="w-10 h-10 rounded-xl bg-indigo-100" />
+                 <div className="flex-1">
+                   <p className="text-sm font-bold text-slate-800">{adminName}</p>
+                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Administrator</p>
+                 </div>
+                 <button
+                   onClick={handleAdminLogout}
+                   className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-all duration-300 group"
+                   title="Logout"
+                 >
+                   <RiLogoutCircleLine className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                 </button>
+               </div>
+             </div>
+           </aside>
 
       
 
@@ -150,13 +190,6 @@ function CommentLoad() {
         </div>
       </main>
     </div>
-
-    
-       
-
-
-
-
       
     )
 }

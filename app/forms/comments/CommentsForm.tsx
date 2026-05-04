@@ -35,6 +35,8 @@ export default function CommentsForm() {
         return () => unsubscribe();
     }, []);
 
+
+    
     // Update form name when user changes
     useEffect(() => {
         if (user) {
@@ -52,6 +54,19 @@ export default function CommentsForm() {
             }));
         }
     }, [user]);
+
+       useEffect(() => {
+       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+           console.log("Auth state changed:", currentUser);
+           setUser(currentUser);
+           
+           if (!currentUser) {
+               router.push("/login");
+           }
+       });
+       
+       return () => unsubscribe();
+   }, [router]);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

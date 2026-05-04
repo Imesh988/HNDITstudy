@@ -15,9 +15,6 @@ import Link from "next/link";
 import { MdDashboard } from "react-icons/md";
 
 
-
-
-
 const auth = getAuth(app);
 
 export default function DashboardPage() {
@@ -39,17 +36,16 @@ export default function DashboardPage() {
     return () => clearInterval(timer)
   }, [HeroSection.length])
 
+
+  
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        // No user, redirect to login
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (!currentUser) {
         router.replace("/login");
-      } else if (!user.emailVerified) {
-        // Email not verified, redirect to login
+      } else if (!currentUser.emailVerified) {
         router.replace("/login");
       } else {
-        // User is logged in and verified
-        setUser(user);
+        setUser(currentUser);
         setLoading(false);
       }
     });
@@ -180,13 +176,11 @@ export default function DashboardPage() {
           </p>
 
           <div className="flex flex-wrap gap-4 pt-4">
-            <button className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 hover:-translate-y-1">
-              Get Started <ArrowRight size={20} />
-            </button>
+            <a href="/forms/video" className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 hover:-translate-y-1">
+               Learn More <ArrowRight size={20} />
+            </a>
 
-            <button className="bg-white/80 backdrop-blur-md border-2 border-indigo-100 text-indigo-600 px-8 py-4 rounded-xl font-bold hover:bg-indigo-50 transition-all shadow-sm">
-              Learn More
-            </button>
+            
           </div>
         </motion.div>
 
@@ -233,51 +227,13 @@ export default function DashboardPage() {
         </motion.div>
       </div>
 
-      {/* <section className="py-20 text-center">
-        <h2 className="text-3xl font-bold text-slate-900 mb-2">Why Choose HND Study?</h2>
-
-        <div className="w-24 h-1 bg-indigo-600 mx-auto rounded-full mb-12"></div>
-
-        <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((item) => (
-            <div key={item} className="bg-white p-6 rounded-2xl shadow-lg">
-              <div className="bg-indigo-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
-                <div className="bg-indigo-500 w-8 h-8 rounded-full"></div>
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mt-4">Feature {item}</h3>
-              <p className="text-slate-600 mt-2">Description of feature {item}</p>
-            </div>
-          ))}
-          
-        </div>
-
-          
-      </section> */}
+     
 
 
     </main>
 
 
 
-    // <div className="min-h-screen bg-gray-100">
-    //   <nav className="bg-white shadow-sm">
-    //     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-    //       <h1 className="text-xl font-bold text-gray-800">Dashboard</h1>
-    //      
-    //     </div>
-    //   </nav>
-
-    //   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    //     <div className="bg-white rounded-lg shadow-md p-6">
-    //       <h2 className="text-2xl font-bold mb-4">Welcome, {user?.email}!</h2>
-
-    //       <div className="space-y-2">
-    //         <p><strong>Email:</strong> {user?.email}</p>
-    //         <p><strong>Email Verified:</strong> ✅ Yes</p>
-    //         <p><strong>User ID:</strong> {user?.uid}</p>
-    //       </div>
-    //     </div>
-    //   </div>
-    // </div>
+    
   );
 }

@@ -19,7 +19,6 @@ export default function LoginPage() {
   const [resetMessage , setResetMessage] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
 
-  // Check if already logged in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && user.emailVerified) {
@@ -36,6 +35,15 @@ export default function LoginPage() {
     setError("");
 
     try {
+
+      if (email === "admin@gmail.com" && password === "admin123") {
+      // Set admin session
+      localStorage.setItem('isAdmin', 'true');
+      sessionStorage.setItem('adminSession', Date.now().toString());
+      window.location.href = "/admin";
+      return;
+    }
+    
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
@@ -48,7 +56,6 @@ export default function LoginPage() {
         return;
       }
       
-      // Force redirect using window.location
       console.log("Redirecting to dashboard...");
       window.location.href = "/dashboard";
       
@@ -84,7 +91,6 @@ export default function LoginPage() {
       setError("Please enter your email address  !!")
       setResetLoading(false)
       return
-      return;
     }
 
     try {
@@ -107,15 +113,12 @@ export default function LoginPage() {
   return (
           <div className="min-h-screen bg-[#f8faff] flex flex-col font-sans">
       
-      {/* Header Logo Section */}
       
 
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row min-h-[600px]">
           
-          {/* LEFT SIDE - IMAGE & TEXT (Hidden on mobile) */}
           <div className="hidden md:flex md:w-1/2 bg-[#1a1a4d] relative p-12 flex-col justify-end text-white overflow-hidden">
-            {/* Background Image with Overlay */}
             <div className="absolute inset-0 opacity-40">
                 <img 
                     src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80" 
@@ -190,7 +193,6 @@ export default function LoginPage() {
                     {loading ? "Signing in..." : "Login to Dashboard →"}
                   </button>
 
-                  {/* Social Logins */}
                   <div className="relative my-8">
                     <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-100"></span></div>
                   </div>
@@ -206,7 +208,6 @@ export default function LoginPage() {
                 </p>
               </div>
             ) : (
-              // --- FORGOT PASSWORD FORM ---
               <div className="w-full max-w-sm mx-auto animate-fade-in">
                 <h1 className="text-2xl font-bold text-[#1a1a4d] mb-4">Reset Password</h1>
                 
@@ -252,7 +253,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Footer Section */}
       <div className="p-8 flex flex-col md:flex-row justify-between items-center text-[11px] text-gray-400 gap-4">
         
     

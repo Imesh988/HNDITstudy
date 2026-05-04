@@ -1,6 +1,5 @@
 // app/admin/dashboard/page.tsx
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Users, TrendingUp, 
@@ -22,8 +21,9 @@ import CommentLoad from './load/page';
 import { CommAPI, VideoAPI } from '@/services/api';
 import { Comm } from '@/type/Comm';
 import { Video } from '@/type/Video';
-
-
+import { useRouter } from 'next/navigation';
+import { getAuth, signOut } from 'firebase/auth';
+import { RiLogoutCircleLine } from 'react-icons/ri';
 
 interface Student {
   id: string;
@@ -47,28 +47,61 @@ const AdminDashboard: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState('all');
   const [allowComments , setAllowComments ] = useState<Comm[]>([]);
   const [allowVideo , setAllowVideo] = useState<Video[]>([]);
+  const router = useRouter();
+  const [adminName, setAdminName] = useState('Admin');
 
   useEffect(() => {
     fetchStudents();
     fetchComments();
     fetchVideo();
+    checkAdminAuth();
   }, []);
 
+  const checkAdminAuth = () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    
+    if (!user && !isAdmin) {
+      router.push('/login');
+    }
+  };
+
+  useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user?.displayName) {
+      setAdminName(user.displayName);
+    } else {
+      setAdminName('Admin User');
+    }
+  }, []);
+
+  const handleAdminLogout = async () => {
+    try {
+      const auth = getAuth();
+      await signOut(auth);
+      localStorage.removeItem('isAdmin');
+      sessionStorage.clear();
+      router.push('/login');
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Logout failed. Please try again.");
+    }
+  };
 
   const fetchComments = async () => {
-   try {
-    setLoading(true);
-    const response = await CommAPI.getAll();
-    setAllowComments(response.data);
-    console.log(response.data);
-    
-    
-   } catch (error) {
-    console.error("Error fetching comments:", error);
-    toast.error("Failed to load comments");
-   } finally {
-    setLoading(false);
-   }
+    try {
+      setLoading(true);
+      const response = await CommAPI.getAll();
+      setAllowComments(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      toast.error("Failed to load comments");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const fetchVideo = async () => {
@@ -85,57 +118,52 @@ const AdminDashboard: React.FC = () => {
     }
   }
 
-const fetchStudents = async () => {
-  try {
-    setLoading(true);
-    const db = getFirestore(app);
-    
-    const usersRef = collection(db, 'users');
-    
-    console.log("🔍 Fetching from users collection...");
-    
-    const querySnapshot = await getDocs(usersRef);
-    
-    console.log(`📊 Found ${querySnapshot.size} documents`);
-    
-    if (querySnapshot.empty) {
-      console.warn("⚠️ No documents in users collection!");
-      toast.error('No users found in Firestore');
-      setStudents([]);
-      return;
-    }
-    
-    const studentsData: Student[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      console.log(`📄 Document ${doc.id}:`, data);
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      const db = getFirestore(app);
+      const usersRef = collection(db, 'users');
+      console.log("🔍 Fetching from users collection...");
+      const querySnapshot = await getDocs(usersRef);
+      console.log(`📊 Found ${querySnapshot.size} documents`);
       
-      studentsData.push({
-        id: doc.id,
-        email: data.email || 'No email',
-        name: data.displayName || data.name || 'No Name',
-        createdAt: data.createAt?.toDate() || new Date(),
-        role: data.role || 'user'
+      if (querySnapshot.empty) {
+        console.warn("⚠️ No documents in users collection!");
+        toast.error('No users found in Firestore');
+        setStudents([]);
+        return;
+      }
+      
+      const studentsData: Student[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        console.log(`📄 Document ${doc.id}:`, data);
+        
+        studentsData.push({
+          id: doc.id,
+          email: data.email || 'No email',
+          name: data.displayName || data.name || 'No Name',
+          createdAt: data.createAt?.toDate() || new Date(),
+          role: data.role || 'user'
+        });
       });
-    });
-    
-    setStudents(studentsData);
-    console.log(`✅ Loaded ${studentsData.length} users successfully`);
-    
-  } catch (error: any) {
-    console.error("❌ Error fetching students:", error);
-    
-    if (error.code === 'permission-denied') {
-      toast.error('Permission denied! Check Firestore security rules');
-    } else if (error.code === 'failed-precondition') {
-      toast.error('Missing index! Check console for link to create index');
-    } else {
-      toast.error(`Error: ${error.message}`);
+      
+      setStudents(studentsData);
+      console.log(`✅ Loaded ${studentsData.length} users successfully`);
+    } catch (error: any) {
+      console.error("❌ Error fetching students:", error);
+      
+      if (error.code === 'permission-denied') {
+        toast.error('Permission denied! Check Firestore security rules');
+      } else if (error.code === 'failed-precondition') {
+        toast.error('Missing index! Check console for link to create index');
+      } else {
+        toast.error(`Error: ${error.message}`);
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};  
+  };  
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -154,9 +182,6 @@ const fetchStudents = async () => {
   return (
     <div className="flex min-h-screen bg-[#F8F9FD] font-sans text-slate-900">
       <Toaster position="top-center" />
-      
-
-
 
       <aside className="w-64 bg-white border-r border-gray-100 flex-col fixed h-full hidden lg:flex">
         <div className="p-6">
@@ -169,8 +194,7 @@ const fetchStudents = async () => {
         </div>
 
         <nav className="flex-1 px-4 space-y-2 mt-4">
-          <NavItem icon={<MdSpaceDashboard size={20} />} label="Dashboard" href='/admin' />
-          {/* <NavItem icon={<FaUsersLine size={20} />} label="User Management" href='/admin/users' /> */}
+          <NavItem icon={<MdSpaceDashboard size={20} />} label="Dashboard" href='/admin/dashboard' />
           <NavItem icon={<FaVideo size={20} />} label="upload Video" href='/forms/video/admin' />
           <NavItem icon={<FaCommentSms size={20} />} label="Upload Approvals" href='/admin/load' />
         </nav>
@@ -178,94 +202,90 @@ const fetchStudents = async () => {
         <div className="p-4 border-t border-gray-100">
           <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-2xl">
             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="admin" className="w-10 h-10 rounded-xl bg-indigo-100" />
-            <div>
-              <p className="text-sm font-bold text-slate-800">Admin Central</p>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Controller</p>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-slate-800">{adminName}</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Administrator</p>
             </div>
+            <button
+              onClick={handleAdminLogout}
+              className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-all duration-300 group"
+              title="Logout"
+            >
+              <RiLogoutCircleLine className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
           </div>
         </div>
       </aside>
-
-      
 
       <main className="flex-1 lg:ml-64 flex flex-col">
         <header className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-10">
           <h1 className="text-sm font-bold text-indigo-900 uppercase tracking-widest">IT Student Portal Admin</h1>
           <div className="flex items-center gap-4">
-         
-            
+            <button
+              onClick={handleAdminLogout}
+              className="lg:hidden p-2 text-red-500 hover:bg-red-50 rounded-full transition-all duration-300"
+              title="Logout"
+            >
+              <RiLogoutCircleLine className="w-6 h-6" />
+            </button>
           </div>
         </header>
 
         <div className="p-4 lg:p-8 space-y-6 lg:space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-  
-  {/* Card 1 - Total Students */}
-  <div className="group relative bg-gradient-to-br from-yellow-50 via-yellow-50/50 to-white p-6 rounded-2xl shadow-lg border border-yellow-100 hover:shadow-2xl hover:shadow-yellow-100/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
-    <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-200 rounded-full -mr-10 -mt-10 opacity-20 group-hover:scale-150 transition-transform duration-500"></div>
-    <div className="absolute bottom-0 left-0 w-16 h-16 bg-yellow-300 rounded-full -ml-8 -mb-8 opacity-10 group-hover:scale-150 transition-transform duration-500"></div>
-    
-    <div className="flex items-center justify-between mb-4 relative z-10">
-      <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
-        <Users className="text-white" size={28} />
-      </div>
-      
-    </div>
-    
-    <h3 className="text-3xl font-bold text-gray-800 relative z-10 group-hover:text-yellow-700 transition-colors duration-300">
-      {totalStudents}
-    </h3>
-    <p className="text-sm font-medium text-gray-500 mt-2 relative z-10">Total Students</p>
-    
-    
-  </div>
+            <div className="group relative bg-gradient-to-br from-yellow-50 via-yellow-50/50 to-white p-6 rounded-2xl shadow-lg border border-yellow-100 hover:shadow-2xl hover:shadow-yellow-100/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-200 rounded-full -mr-10 -mt-10 opacity-20 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 bg-yellow-300 rounded-full -ml-8 -mb-8 opacity-10 group-hover:scale-150 transition-transform duration-500"></div>
+              
+              <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
+                  <Users className="text-white" size={28} />
+                </div>
+              </div>
+              
+              <h3 className="text-3xl font-bold text-gray-800 relative z-10 group-hover:text-yellow-700 transition-colors duration-300">
+                {totalStudents}
+              </h3>
+              <p className="text-sm font-medium text-gray-500 mt-2 relative z-10">Total Students</p>
+            </div>
 
-  {/* Card 2 - All Comments */}
-  <div className="group relative bg-gradient-to-br from-emerald-50 via-emerald-50/50 to-white p-6 rounded-2xl shadow-lg border border-emerald-100 hover:shadow-2xl hover:shadow-emerald-100/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
-    <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-200 rounded-full -mr-10 -mt-10 opacity-20 group-hover:scale-150 transition-transform duration-500"></div>
-    <div className="absolute bottom-0 left-0 w-16 h-16 bg-emerald-300 rounded-full -ml-8 -mb-8 opacity-10 group-hover:scale-150 transition-transform duration-500"></div>
-    
-    <div className="flex items-center justify-between mb-4 relative z-10">
-      <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 group-hover:rotate-6">
-        <FaCommentSms className="text-white" size={28} />
-      </div>
-      <div className="px-2 py-1 bg-emerald-100 rounded-full animate-pulse">
-        <span className="text-xs font-bold text-emerald-700">New</span>
-      </div>
-    </div>
-    
-    <h3 className="text-3xl font-bold text-gray-800 relative z-10 group-hover:text-emerald-700 transition-colors duration-300">
-      {allowComments.length}
-    </h3>
-    <p className="text-sm font-medium text-gray-500 mt-2 relative z-10">All Comments</p>
-    
-   
-  </div>
+            <div className="group relative bg-gradient-to-br from-emerald-50 via-emerald-50/50 to-white p-6 rounded-2xl shadow-lg border border-emerald-100 hover:shadow-2xl hover:shadow-emerald-100/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-200 rounded-full -mr-10 -mt-10 opacity-20 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 bg-emerald-300 rounded-full -ml-8 -mb-8 opacity-10 group-hover:scale-150 transition-transform duration-500"></div>
+              
+              <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 group-hover:rotate-6">
+                  <FaCommentSms className="text-white" size={28} />
+                </div>
+                <div className="px-2 py-1 bg-emerald-100 rounded-full animate-pulse">
+                </div>
+              </div>
+              
+              <h3 className="text-3xl font-bold text-gray-800 relative z-10 group-hover:text-emerald-700 transition-colors duration-300">
+                {allowComments.length}
+              </h3>
+              <p className="text-sm font-medium text-gray-500 mt-2 relative z-10">All Comments</p>
+            </div>
 
-  {/* Card 3 - All Videos */}
-  <div className="group relative bg-gradient-to-br from-purple-50 via-purple-50/50 to-white p-6 rounded-2xl shadow-lg border border-purple-100 hover:shadow-2xl hover:shadow-purple-100/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
-    <div className="absolute top-0 right-0 w-20 h-20 bg-purple-200 rounded-full -mr-10 -mt-10 opacity-20 group-hover:scale-150 transition-transform duration-500"></div>
-    <div className="absolute bottom-0 left-0 w-16 h-16 bg-purple-300 rounded-full -ml-8 -mb-8 opacity-10 group-hover:scale-150 transition-transform duration-500"></div>
-    
-    <div className="flex items-center justify-between mb-4 relative z-10">
-      <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 group-hover:-rotate-6">
-        <FaVideo className="text-white" size={28} />
-      </div>
-      <div className="px-2 py-1 bg-purple-100 rounded-full">
-        <span className="text-xs font-bold text-purple-700">{allowVideo.length} Total</span>
-      </div>
-    </div>
-    
-    <h3 className="text-3xl font-bold text-gray-800 relative z-10 group-hover:text-purple-700 transition-colors duration-300">
-      {allowVideo.length}
-    </h3>
-    <p className="text-sm font-medium text-gray-500 mt-2 relative z-10">All Videos</p>
-    
-    
-  </div>
+            <div className="group relative bg-gradient-to-br from-purple-50 via-purple-50/50 to-white p-6 rounded-2xl shadow-lg border border-purple-100 hover:shadow-2xl hover:shadow-purple-100/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-purple-200 rounded-full -mr-10 -mt-10 opacity-20 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 bg-purple-300 rounded-full -ml-8 -mb-8 opacity-10 group-hover:scale-150 transition-transform duration-500"></div>
+              
+              <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 group-hover:-rotate-6">
+                  <FaVideo className="text-white" size={28} />
+                </div>
+                <div className="px-2 py-1 bg-purple-100 rounded-full">
+                </div>
+              </div>
+              
+              <h3 className="text-3xl font-bold text-gray-800 relative z-10 group-hover:text-purple-700 transition-colors duration-300">
+                {allowVideo.length}
+              </h3>
+              <p className="text-sm font-medium text-gray-500 mt-2 relative z-10">All Videos</p>
+            </div>
+          </div>
 
-  
-</div>
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="p-6 border-b border-slate-100">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -283,7 +303,6 @@ const fetchStudents = async () => {
                       className="pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-64"
                     />
                   </div>
-                 
                 </div>
               </div>
             </div>
@@ -351,11 +370,7 @@ const fetchStudents = async () => {
                 </tbody>
               </table>
             </div>
-
-           
           </div>
-
-          
         </div>
       </main>
     </div>
@@ -364,12 +379,12 @@ const fetchStudents = async () => {
 
 const NavItem: React.FC<NavItemProps> = ({ icon, label, href, active = false }) => (
   <Link href={href}>
-  <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 ${
-    active ? 'bg-indigo-600 shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-indigo-200'
-  }`}>
-    {icon}
-    <span className="text-sm font-bold tracking-tight">{label}</span>
-  </div>
+    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 ${
+      active ? 'bg-indigo-600 shadow-lg shadow-indigo-100 text-white' : 'text-slate-500 hover:bg-indigo-50'
+    }`}>
+      {icon}
+      <span className="text-sm font-bold tracking-tight">{label}</span>
+    </div>
   </Link>
 );
 

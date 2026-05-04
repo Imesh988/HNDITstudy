@@ -25,6 +25,11 @@ export default function VideoPage() {
         fetchVideos();
     }, []);
 
+  
+
+  
+    
+
     useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         console.log("Auth state changed:", currentUser);
