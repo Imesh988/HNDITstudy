@@ -136,11 +136,9 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* RIGHT SIDE - FORMS */}
           <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center bg-[#fbfcff]">
             
             {!showReset ? (
-              // --- LOGIN FORM ---
               <div className="w-full max-w-sm mx-auto">
                 <h1 className="text-2xl font-bold text-[#1a1a4d] mb-2">Welcome Back</h1>
                 <p className="text-gray-500 text-sm mb-8">Please enter your details to access your learning dashboard.</p>
